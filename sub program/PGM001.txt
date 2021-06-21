@@ -1,0 +1,49 @@
+       IDENTIFICATION DIVISION.                           
+       PROGRAM-ID. PGM001.                                
+       ENVIRONMENT DIVISION.                              
+       INPUT-OUTPUT SECTION.                              
+       FILE-CONTROL.                                      
+            SELECT IN-ITEM-FILE ASSIGN TO INITEM          
+                                FILE STATUS IS FSTAT.     
+       DATA DIVISION.                                     
+       FILE SECTION.                                      
+       FD IN-ITEM-FILE.                                   
+       01 IN-ITEM-REC.                                    
+          05 PITEM-CODE  PIC X(2).                        
+          05 PITEM-PRICE PIC 9(3)V99.                     
+       WORKING-STORAGE SECTION.                           
+       77 WS-EOF    PIC X(01) VALUE 'N'.                  
+       77 FSTAT   PIC XX.
+       01 ABCODE    PIC S9(9) BINARY.                         
+       01 CLEAN-UP  PIC S9(9) BINARY.                         
+       LINKAGE SECTION.                                       
+       77 WS-SUB PIC 9(1).                                    
+       01 TABLE-PRICES.                                       
+          05 ITEM-PRICES OCCURS 5 TIMES.                      
+             10 ITEM-CODE  PIC X(02).                         
+             10 ITEM-PRICE PIC 9(03)V99.                      
+       PROCEDURE DIVISION USING WS-SUB TABLE-PRICES.          
+       0001-START.                                            
+            PERFORM 1000-INIT THRU 1000-EXIT.                 
+            READ IN-ITEM-FILE AT END MOVE 'Y' TO WS-EOF.      
+            PERFORM 2000-READ-LOAD THRU 2000-EXIT             
+                         UNTIL WS-EOF = 'Y' OR                
+                               WS-SUB = 06.                   
+            PERFORM 3000-EOJ THRU 3000-EXIT.                  
+            GOBACK.                                        
+       1000-INIT.                                          
+            MOVE 0 TO WS-SUB.                              
+            OPEN INPUT IN-ITEM-FILE.                       
+       1000-EXIT.                                          
+            EXIT.                                          
+       2000-READ-LOAD.                                     
+            ADD 1 TO WS-SUB                                
+            MOVE PITEM-CODE TO ITEM-CODE(WS-SUB).          
+            MOVE PITEM-PRICE TO ITEM-PRICE(WS-SUB).        
+            READ IN-ITEM-FILE AT END MOVE 'Y' TO WS-EOF.   
+       2000-EXIT.                                          
+            EXIT.                                          
+       3000-EOJ.                                           
+            CLOSE IN-ITEM-FILE.                            
+       3000-EXIT.                                          
+            EXIT.                                                                           

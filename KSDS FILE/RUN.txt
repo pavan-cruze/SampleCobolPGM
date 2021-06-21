@@ -1,0 +1,12 @@
+//DSRC027D JOB NOTIFY=&SYSUID,TIME=(0,5)                          
+//JOBLIB   DD  DSN=DSRC027.SAMPLE.LOADLIB,DISP=SHR                
+//STEP1   EXEC PGM=IEFBR14                                        
+//OUTFILE  DD  DSN=DSRC027.SAMP.EMP.OUT,DISP=(MOD,DELETE,DELETE), 
+//             DSORG=PS,SPACE=(TRK,(0,0))                         
+//STEP2   EXEC PGM=PGMUPDT                                        
+//OLDMAST DD  DSN=DSRC027.SAMP.EMP.TEST,DISP=SHR                  
+//TRANF   DD  DSN=DSRC027.SAMPLE.TEST.TRAN,DISP=SHR               
+//NEWMAST DD DSN=DSRC027.SAMP.EMP.OUT,DISP=(NEW,CATLG,DELETE),    
+//             VOL=SER=ZAPRD6,SPACE=(TRK,(1,1)),                  
+//             DCB=(LRECL=70,DSORG=PS,RECFM=FB,BLKSIZE=700)       
+//                                                                

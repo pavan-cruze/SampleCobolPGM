@@ -1,0 +1,330 @@
+       IDENTIFICATION DIVISION.                             
+       PROGRAM-ID. PGM01.                                   
+       ENVIRONMENT DIVISION.                                
+       INPUT-OUTPUT SECTION.                                
+       FILE-CONTROL.                                        
+                SELECT ITEM-SALE-FILE ASSIGN TO ITEMIN      
+                         STATUS  ITEM-STAT.                 
+                SELECT ITEM-REP-FILE  ASSIGN TO IREPORT     
+                         STATUS  REP-STAT.                  
+       DATA DIVISION.                                       
+       FILE SECTION.                                        
+       FD ITEM-SALE-FILE.                                   
+       01 ITEM-SALE-REC.                                    
+         05 PRODUCT-CODE        PIC X(03).                  
+         05 ITEM-CODE           PIC X(02).                  
+         05 SALES-REGION-CODE   PIC X(03).                  
+         05 SALES-AREA-CODE     PIC X(02).                
+         05 ITEM-UNITS          PIC 9(03).                
+       FD ITEM-REP-FILE.                                  
+       01 ITEM-REP-REC.                                   
+          05 ITEM-REP-CC        PIC X(01).                
+          05 ITEM-REC-DTL       PIC X(70).                
+       WORKING-STORAGE SECTION.                           
+       77 ITEM-STAT             PIC X(02).                
+       77 REP-STAT              PIC X(02).                
+       77 EOF-ITEM              PIC X(01) VALUE 'N'.      
+       77 ABCODE                PIC S9(09) COMP.          
+       77 CLEANUP               PIC S9(09) COMP.          
+       01 PREV-KEY  VALUE LOW-VALUES.                     
+          05 PREV-REGION        PIC X(03).                
+          05 PREV-AREA          PIC X(02).                
+          05 PREV-PRODUCT       PIC X(03).                
+          05 PREV-ITEM          PIC X(02).                
+       01 CURR-KEY.                                                    
+          05 CURR-REGION        PIC X(03).                             
+          05 CURR-AREA          PIC X(02).                             
+          05 CURR-PRODUCT       PIC X(03).                             
+          05 CURR-ITEM          PIC X(02).                             
+       77 HOLD-REGION           PIC X(03).                             
+       77 HOLD-AREA             PIC X(02).                             
+       77 HOLD-PRODUCT          PIC X(03).                             
+       77 REP-LINE-COUNT        PIC 9(02) VALUE 10.                    
+       77 REP-PAGE-NO           PIC 9(04) VALUE ZERO.                  
+       01 HL-1.                                                        
+          05 FILLER       PIC X(01).                                   
+          05 FILLER       PIC X(25) VALUE '       PRODUCT  SALES REP'. 
+          05 FILLER       PIC X(21) VALUE 'ORT             PAGE '.     
+          05 HL-1-PAGENO  PIC ZZZ9.                                    
+       01 HL-2.                                                        
+          05 FILLER       PIC X(01).                                   
+          05 FILLER       PIC X(25) VALUE 'REGION AREA PRODUCT ITEM '. 
+          05 FILLER       PIC X(25) VALUE 'UNITS- PRICE SALES-AMOUNT'. 
+       01 JOB-TOTALS.                                                  
+          05 TOTALS  OCCURS 5 TIMES.                                   
+            10 TOT-REC    PIC 9(05).                                   
+            10 TOT-UNITS  PIC S9(08)    COMP-3.                        
+            10 TOT-SALES  PIC S9(12)V99 COMP-3.                        
+       01 DL-1.                                                        
+          05 FILLER             PIC X(01).                             
+          05 FILLER             PIC X(02) VALUE SPACES.                
+          05 DL1-REGION         PIC X(03).                             
+          05 FILLER             PIC X(03) VALUE SPACES.                
+          05 DL1-AREA           PIC X(02).                             
+          05 FILLER             PIC X(04) VALUE SPACES.                
+          05 DL1-PRODUCT        PIC X(03).                             
+          05 FILLER             PIC X(04) VALUE SPACES.                
+          05 DL1-ITEM           PIC X(02).                             
+          05 FILLER             PIC X(04) VALUE SPACES.              
+          05 DL1-UNITS          PIC ZZ9.                             
+          05 FILLER             PIC X(01) VALUE SPACES.              
+          05 DL1-PRICE          PIC ZZ9.99.                          
+          05 FILLER             PIC X(03) VALUE SPACES.              
+          05 DL1-SALES          PIC ZZZZZZ9.99.                      
+       01 TL-1.                                                      
+          05 FILLER             PIC X(01).                           
+          05 FILLER             PIC X(14) VALUE '       REIGON '.    
+          05 TL1-REGION         PIC X(03).                           
+          05 FILLER             PIC X(06) VALUE SPACES.              
+          05 TL1-UNITS          PIC ZZZZZZ9.                         
+          05 FILLER             PIC X(06) VALUE SPACES.              
+          05 TL1-SALES-AMOUNT   PIC ZZZZZZZZZZ9.99.                  
+       01 TL-2.                                                      
+          05 FILLER             PIC X(01).                           
+          05 FILLER             PIC X(14) VALUE '         AREA '.    
+          05 TL2-AREA           PIC X(02).                         
+          05 FILLER             PIC X(08) VALUE SPACES.            
+          05 TL2-UNITS          PIC ZZZZZ9.                        
+          05 FILLER             PIC X(07) VALUE SPACES.            
+          05 TL2-SALES-AMOUNT   PIC ZZZZZZZZZ9.99.                 
+       01 TL-3.                                                    
+          05 FILLER             PIC X(01).                         
+          05 FILLER             PIC X(14) VALUE '      PRODUCT '.  
+          05 TL3-PRODUCT        PIC X(03).                         
+          05 FILLER             PIC X(08) VALUE SPACES.            
+          05 TL3-UNITS          PIC ZZZZ9.                         
+          05 FILLER             PIC X(08) VALUE SPACES.            
+          05 TL3-SALES-AMOUNT   PIC ZZZZZZZZ9.99.                  
+       01 TL-4.                                                    
+          05 FILLER             PIC X(01).                         
+          05 FILLER             PIC X(10) VALUE 'JOB TOTALS'.      
+          05 FILLER             PIC X(40) VALUE SPACES.            
+       01 TL-5.                                                 
+          05 FILLER             PIC X(01).                      
+          05 FILLER             PIC X(05) VALUE 'INPUT'.        
+          05 FILLER             PIC X(45) VALUE SPACES.         
+       01 TL-6.                                                 
+          05 FILLER             PIC X(01).                      
+          05 FILLER             PIC X(08) VALUE ' RECORDS'.     
+          05 FILLER             PIC X(10) VALUE SPACES.         
+          05 TL6-RECORDS        PIC ZZZ9.                       
+          05 FILLER             PIC X(28) VALUE SPACES.         
+       01 TL-7.                                                 
+          05 FILLER             PIC X(01).                      
+          05 FILLER             PIC X(08) VALUE ' UNITS--'.     
+          05 FILLER             PIC X(07) VALUE SPACES.         
+          05 TL7-UNITS          PIC ZZZZZZZ9.                   
+          05 FILLER             PIC X(27) VALUE SPACES.         
+       01 TL-8.                                                 
+          05 FILLER     PIC X(01).                                     
+          05 FILLER     PIC X(23) VALUE 'REPORT----------------'.      
+          05 FILLER     PIC X(27) VALUE SPACES.                        
+       01 TL-9.                                                        
+          05 FILLER             PIC X(01).                             
+          05 FILLER             PIC X(06) VALUE ' UNITS'.              
+          05 FILLER             PIC X(08) VALUE SPACES.                
+          05 TL9-UNITS          PIC ZZZZZZZZ9.                         
+          05 FILLER             PIC X(27) VALUE SPACES.                
+       01 TL-10.                                                       
+          05 FILLER             PIC X(01).                             
+          05 FILLER             PIC X(06) VALUE 'AMOUNT'.              
+          05 FILLER             PIC X(02) VALUE SPACES.                
+          05 TL10-AMOUNT        PIC ZZZZZZZZZZZ9.99.                   
+          05 FILLER             PIC X(27) VALUE SPACES.                
+       77 WS-SALES-AMT          PIC 9(12)V99 COMP-3.                   
+       77 WS-PRICE              PIC 9(03)V99.                          
+       77 WS-SUB                PIC 9(01).                        
+       01 TABLE-PRICES.                                           
+          05 ITEM-PRICES OCCURS 5 TIMES INDEXED BY PTAB-IDX.      
+             10 ITEM-CODE-T PIC X(02).                            
+             10 ITEM-PRICE PIC 9(03)V99.                          
+       PROCEDURE DIVISION.                                        
+       0000-MULTREP.                                              
+           PERFORM 1000-INIT THRU 1000-EXIT.                      
+           PERFORM 2000-PRINT-READ THRU 2000-EXIT                 
+                   UNTIL EOF-ITEM = 'Y'.                          
+           PERFORM 3000-REGION-CHANGE THRU 3000-EXIT.             
+           PERFORM 8000-EOJ THRU 8000-EXIT.                       
+           GOBACK.                                                
+       1000-INIT.                                                 
+           OPEN INPUT  ITEM-SALE-FILE.                            
+           OPEN OUTPUT ITEM-REP-FILE.                             
+           INITIALIZE JOB-TOTALS.                                 
+            PERFORM 8100-READ-ITEM-SALE THRU 8100-EXIT.    
+            PERFORM 1100-MOVE-HOLD-KEYS THRU 1100-EXIT.    
+            CALL 'PGM001' USING WS-SUB TABLE-PRICES.       
+        1000-EXIT.                                         
+             EXIT.                                         
+        1100-MOVE-HOLD-KEYS.                               
+            MOVE SALES-REGION-CODE TO HOLD-REGION.         
+            MOVE SALES-AREA-CODE   TO HOLD-AREA.           
+            MOVE PRODUCT-CODE      TO HOLD-PRODUCT.        
+        1100-EXIT.                                         
+            EXIT.                                          
+        2000-PRINT-READ.                                   
+            IF SALES-REGION-CODE NOT = HOLD-REGION         
+               PERFORM 3000-REGION-CHANGE THRU 3000-EXIT   
+            ELSE                                           
+               IF SALES-AREA-CODE NOT = HOLD-AREA          
+                  PERFORM 4000-AREA-CHANGE THRU 4000-EXIT  
+              ELSE                                            
+                 IF PRODUCT-CODE NOT = HOLD-PRODUCT           
+                    PERFORM 5000-PRODUCT-CHANGE THRU 5000-EXIT
+                 END-IF                                       
+                END-IF                                        
+           END-IF.                                            
+           PERFORM 6000-PRINT-ITEM-LINE THRU 6000-EXIT.       
+           PERFORM 8100-READ-ITEM-SALE THRU 8100-EXIT.        
+       2000-EXIT.                                             
+            EXIT.                                             
+       3000-REGION-CHANGE.                                    
+            PERFORM 4000-AREA-CHANGE THRU 4000-EXIT.          
+            PERFORM 3100-PRINT-REGION-TOTAL THRU 3100-EXIT.   
+       3000-EXIT.                                             
+            EXIT.                                             
+       3100-PRINT-REGION-TOTAL.                               
+            MOVE HOLD-REGION    TO TL1-REGION.                
+            MOVE TOT-UNITS(4)   TO TL1-UNITS.             
+            MOVE TOT-SALES(4)   TO TL1-SALES-AMOUNT.      
+            WRITE ITEM-REP-REC  FROM TL-1.                
+            MOVE  10 TO REP-LINE-COUNT.                   
+            ADD  TOT-UNITS(4)   TO TOT-UNITS(5).          
+            ADD  TOT-SALES(4)   TO TOT-SALES(5).          
+            MOVE 0  TO TOT-UNITS(4)                       
+                       TOT-SALES(4).                      
+            MOVE SALES-REGION-CODE TO HOLD-REGION.        
+       3100-EXIT.                                         
+            EXIT.                                         
+       4000-AREA-CHANGE.                                  
+            PERFORM 5000-PRODUCT-CHANGE.                  
+            PERFORM 4100-PRINT-AREA-TOTAL THRU 4100-EXIT. 
+       4000-EXIT.                                         
+            EXIT.                                         
+       4100-PRINT-AREA-TOTAL.                             
+            MOVE HOLD-AREA    TO TL2-AREA.                    
+            MOVE TOT-UNITS(3)   TO TL2-UNITS.                 
+            MOVE TOT-SALES(3)   TO TL2-SALES-AMOUNT.          
+            WRITE ITEM-REP-REC  FROM TL-2.                    
+            ADD  TOT-UNITS(3)   TO  TOT-UNITS(4).             
+            ADD  TOT-SALES(3)   TO  TOT-SALES(4).             
+            MOVE 0  TO TOT-UNITS(3)                           
+                       TOT-SALES(3).                          
+            MOVE SALES-AREA-CODE TO HOLD-AREA.                
+       4100-EXIT.                                             
+            EXIT.                                             
+       5000-PRODUCT-CHANGE.                                   
+           PERFORM 5100-PRINT-PRODUCT-TOTAL THRU 5100-EXIT.   
+       5000-EXIT.                                             
+           EXIT.                                              
+       5100-PRINT-PRODUCT-TOTAL.                              
+            MOVE HOLD-PRODUCT   TO TL3-PRODUCT.               
+            MOVE TOT-UNITS(2)   TO TL3-UNITS.            
+            MOVE TOT-SALES(2)   TO TL3-SALES-AMOUNT.     
+            WRITE ITEM-REP-REC  FROM TL-3.               
+            ADD  TOT-UNITS(2)   TO  TOT-UNITS(3).        
+            ADD  TOT-SALES(2)   TO  TOT-SALES(3).        
+            MOVE 0  TO TOT-UNITS(2)                      
+                       TOT-SALES(2).                     
+            MOVE PRODUCT-CODE TO HOLD-PRODUCT.           
+       5100-EXIT.                                        
+           EXIT.                                         
+       6000-PRINT-ITEM-LINE.                             
+            PERFORM 6100-GET-SALES-AMT THRU 6100-EXIT.   
+            PERFORM 6200-MOVE-TO-DTL   THRU 6200-EXIT.   
+            ADD ITEM-UNITS   TO TOT-UNITS(2).            
+            ADD WS-SALES-AMT TO TOT-SALES(2).            
+            PERFORM 6300-WRITE-LINE THRU 6300-EXIT.      
+       6000-EXIT.                                        
+           EXIT.                                                   
+       6100-GET-SALES-AMT.                                         
+            SET PTAB-IDX TO 1.                                     
+            SEARCH ITEM-PRICES AT END MOVE 0 TO WS-PRICE           
+              WHEN ITEM-CODE-T(PTAB-IDX) = ITEM-CODE               
+                   MOVE ITEM-PRICE(PTAB-IDX) TO WS-PRICE           
+            END-SEARCH.                                            
+            MULTIPLY WS-PRICE BY ITEM-UNITS GIVING WS-SALES-AMT.   
+       6100-EXIT.                                                  
+           EXIT.                                                   
+       6200-MOVE-TO-DTL.                                           
+            MOVE PRODUCT-CODE      TO DL1-PRODUCT.                 
+            MOVE ITEM-CODE         TO DL1-ITEM.                    
+            MOVE SALES-REGION-CODE TO DL1-REGION.                  
+            MOVE ITEM-UNITS        TO DL1-UNITS.                   
+            MOVE WS-SALES-AMT      TO DL1-SALES.                   
+            MOVE WS-PRICE          TO DL1-PRICE.                   
+            MOVE SALES-AREA-CODE   TO DL1-AREA.                
+       6200-EXIT.                                              
+           EXIT.                                               
+       6300-WRITE-LINE.                                        
+            IF REP-LINE-COUNT >= 10                            
+               PERFORM 6400-HEADING THRU 6400-EXIT             
+            END-IF.                                            
+            WRITE ITEM-REP-REC FROM DL-1.                      
+            ADD 1 TO REP-LINE-COUNT.                           
+       6300-EXIT.                                              
+           EXIT.                                               
+       6400-HEADING.                                           
+            MOVE 0 TO REP-LINE-COUNT.                          
+            ADD  1 TO REP-PAGE-NO.                             
+            MOVE REP-PAGE-NO TO HL-1-PAGENO.                   
+            WRITE ITEM-REP-REC FROM HL-1 AFTER ADVANCING PAGE. 
+            WRITE ITEM-REP-REC FROM HL-2.                      
+       6400-EXIT.                                             
+           EXIT.                                              
+       8000-EOJ.                                              
+            PERFORM 8010-PRINT-JOB-TOTALS THRU 8010-EXIT.     
+            CLOSE ITEM-SALE-FILE                              
+                  ITEM-REP-FILE.                              
+       8000-EXIT.                                             
+            EXIT.                                             
+       8010-PRINT-JOB-TOTALS.                                 
+           WRITE ITEM-REP-REC FROM TL-4 AFTER ADVANCING PAGE. 
+           WRITE ITEM-REP-REC FROM TL-5.                      
+           MOVE TOT-REC(1) TO TL6-RECORDS.                    
+           WRITE ITEM-REP-REC FROM TL-6.                      
+           MOVE TOT-UNITS(1) TO TL7-UNITS.                    
+           WRITE ITEM-REP-REC FROM TL-7.                      
+           WRITE ITEM-REP-REC FROM TL-8.                      
+           MOVE TOT-UNITS(5) TO TL9-UNITS.                    
+           WRITE ITEM-REP-REC FROM TL-9.                  
+           MOVE TOT-SALES(5) TO TL10-AMOUNT.              
+           WRITE ITEM-REP-REC FROM TL-10.                 
+       8010-EXIT.                                         
+            EXIT.                                         
+       8100-READ-ITEM-SALE.                               
+           READ ITEM-SALE-FILE.                           
+           EVALUATE ITEM-STAT                             
+             WHEN '00'                                    
+                PERFORM 8110-SEQ-CHECK THRU 8110-EXIT     
+                PERFORM 8120-TOTALS    THRU 8120-EXIT     
+             WHEN '10'                                    
+                MOVE 'Y' TO EOF-ITEM                      
+             WHEN OTHER                                   
+                MOVE 8100 TO ABCODE                       
+                PERFORM 9000-ABEND                        
+           END-EVALUATE.                                  
+       8100-EXIT.                                           
+           EXIT.                                            
+       8110-SEQ-CHECK.                                      
+           MOVE SALES-REGION-CODE TO CURR-REGION.           
+           MOVE SALES-AREA-CODE   TO CURR-AREA.             
+           MOVE PRODUCT-CODE      TO CURR-PRODUCT.          
+           MOVE ITEM-CODE         TO CURR-ITEM.             
+           IF CURR-KEY < PREV-KEY                           
+              DISPLAY 'SEQUENCE ERROR IN ITEM SALES FILE'   
+              MOVE 8110 TO ABCODE                           
+              PERFORM 9000-ABEND                            
+           ELSE                                             
+              MOVE CURR-KEY TO PREV-KEY                     
+           END-IF.                                          
+       8110-EXIT.                                           
+           EXIT.                                            
+       8120-TOTALS.                                         
+           ADD 1 TO TOT-REC(1).                      
+           ADD ITEM-UNITS TO TOT-UNITS(1).           
+       8120-EXIT.                                    
+           EXIT.                                     
+       9000-ABEND.                                   
+           MOVE 0 TO CLEANUP.                        
+           CALL 'CEE3ABD' USING ABCODE CLEANUP.      
+                                                     

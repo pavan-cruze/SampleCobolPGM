@@ -1,0 +1,11 @@
+//DSRC027C JOB NOTIFY=&SYSUID,COND=(4,LT)                         
+//JOBPROC  JCLLIB ORDER=IBMUSER.ALL1                              
+//         SET COBMEM=PGM01              --> MEMBER NAME          
+//COBCL EXEC IGYWCL,                                              
+//          SRCLIB=DSRC027.COBOL.PGM,                             
+//          PGMLIB=DSRC027.COBOL.LOADLIB,       --> LOADLIB NAME  
+//          COPYLIB=DSRC027.COBOL.COPYLIB,      --> COPYLIB NAME  
+//          GOPGM=&COBMEM                                         
+//LKED.SYSIN DD DSN=DSRC027.COBOL.LOADLIB(PGM001),DISP=SHR        
+//*LKED.SYSIN DD DUMMY                                            
+//                                                                

@@ -1,0 +1,46 @@
+//DSRC027A JOB  ABC,XYZ,CLASS=A,NOTIFY=&SYSUID,TIME=(,5)        
+//*---------------------------------------------------------    
+//S1       EXEC PGM=IEFBR14                                     
+//NEWFILB  DD  DSN=DSRC027.VSAM.SORTED,DISP=(MOD,DELETE,DELETE),
+//             SPACE=(TRK,(0,0)),UNIT=SYSDA                     
+//*---------------------------------------------------------    
+//*---------------------------------------------------------    
+//S3       EXEC PGM=SORT                                        
+//SORTIN   DD  DSN=DSRC027.SAMP.EMP.TEST,DISP=OLD               
+//SORTOUT  DD  DSN=DSRC027.VSAM.SORTED,DISP=(NEW,CATLG,DELETE), 
+//             UNIT=SYSDA,SPACE=(TRK,(1,1))                     
+//SYSIN    DD   *                                               
+  SORT FIELDS(1,5,CH,A)                                         
+/*                                                              
+//SYSOUT   DD   SYSOUT=*                                        
+//SORTWK01 DD UNIT=SYSDA,SPACE=(CYL,(1,1))                      
+//SORTWK02 DD UNIT=SYSDA,SPACE=(CYL,(1,1))                  
+//SYSPRINT DD SYSOUT=*                                      
+//*---------------------------------------------------------
+//S4       EXEC PGM=IDCAMS                                  
+//SYSPRINT DD SYSOUT=*                                      
+//SYSIN    DD *                                             
+  DELETE DSRC027.EMP.CLUSTER  CLUSTER                       
+  DEFINE CLUSTER (NAME(DSRC027.EMP.CLUSTER)  -              
+                 INDEXED                     -              
+                 RECORDSIZE(70 70)           -              
+                 KEYS(5 0)                   -              
+                 VOLUMES(ZAPRD6)             -              
+                 CYLINDERS(1 1)              -              
+                 CISZ(4096)    )                            
+/*                                                          
+//*---------------------------------------------------------
+//S5       EXEC PGM=IDCAMS                                  
+//SYSPRINT DD SYSOUT=*                                      
+//SYSIN    DD *                                             
+  REPRO INDATASET(DSRC027.VSAM.SORTED)        -             
+       OUTDATASET(DSRC027.EMP.CLUSTER)                      
+/*                                                          
+//*---------------------------------------------------------
+//S6       EXEC PGM=IDCAMS                                  
+//SYSPRINT DD SYSOUT=*                                      
+//SYSIN    DD *                                             
+   PRINT INDATASET(DSRC027.EMP.CLUSTER)                     
+/*                                                          
+//*---------------------------------------------------------
+                                                            

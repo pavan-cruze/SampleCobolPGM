@@ -1,0 +1,162 @@
+       IDENTIFICATION DIVISION.                                 
+       PROGRAM-ID. PGMKSDS.                                     
+       ENVIRONMENT DIVISION.                                    
+       INPUT-OUTPUT SECTION.                                    
+       FILE-CONTROL.                                            
+                 SELECT KSDS-MAST-FILE ASSIGN TO KSDSMAST       
+                                       ORGANIZATION   INDEXED   
+                                       ACCESS         RANDOM    
+                                       RECORD KEY     EMP-ID    
+                                       STATUS         KSDS-STAT.
+                 SELECT EMP-TRAN-FILE  ASSIGN TO TRANFILE       
+                                       STATUS TRAN-STAT.        
+       DATA DIVISION.                                           
+       FILE SECTION.                                            
+       FD KSDS-MAST-FILE.                                       
+       01 EMP-IN-REC.                                           
+          05 EMP-ID         PIC X(05).      
+          05 EMP-FIRST-NAME PIC X(25).      
+          05 EMP-LAST-NAME  PIC X(25).      
+          05 EMP-DEPT       PIC X(04).      
+          05 EMP-BASIC      PIC 9(06).      
+          05 EMP-CCA        PIC 9(05).      
+       FD EMP-TRAN-FILE.                    
+       01 EMP-TRAN-REC.                     
+          05 TRAN-TYPE       PIC X(01).     
+          05 TRAN-EMP-ID     PIC X(05).     
+          05 TRAN-FIRST-NAME PIC X(25).     
+          05 TRAN-LAST-NAME  PIC X(25).     
+          05 TRAN-DEPT       PIC X(04).     
+          05 TRAN-BASIC      PIC 9(06).     
+          05 TRAN-CCA        PIC 9(05).     
+       WORKING-STORAGE SECTION.             
+       01 ABCODE            PIC S9(9) COMP. 
+       01 CLEAN-UP          PIC S9(9) COMP.           
+       77 KSDS-STAT         PIC X(02).                
+       77 TRAN-STAT         PIC X(02).                
+       77 WS-EOF            PIC X     VALUE 'N'.      
+       PROCEDURE DIVISION.                            
+       0001-START.                                    
+            PERFORM 1000-INIT THRU 1000-EXIT.         
+            PERFORM 8000-READ-EMPTRAN THRU 8000-EXIT. 
+            PERFORM 2000-APPLY-READ THRU 2000-EXIT    
+                               UNTIL WS-EOF = 'Y'.    
+            PERFORM 6000-EOJ THRU 6000-EXIT.          
+            GOBACK.                                   
+       1000-INIT.                                     
+            OPEN I-O KSDS-MAST-FILE,                  
+            OPEN INPUT EMP-TRAN-FILE.                 
+       1000-EXIT.                                     
+            EXIT.                                     
+       2000-APPLY-READ.                                     
+            EVALUATE TRAN-TYPE                              
+                  WHEN '1'                                  
+                    PERFORM 2100-ADD                        
+                  WHEN '2'                                  
+                    PERFORM 2200-CHANGE                     
+                  WHEN '3'                                  
+                    PERFORM 2300-DELETE                     
+                  WHEN OTHER                                
+                    DISPLAY 'INCORRECT TRANSACRTION TYPE'   
+                  END-EVALUATE.                             
+                  PERFORM 8000-READ-EMPTRAN THRU 8000-EXIT. 
+       2000-EXIT.                                           
+            EXIT.                                           
+       2100-ADD.                                            
+            MOVE TRAN-EMP-ID     TO EMP-ID.                 
+            MOVE TRAN-FIRST-NAME TO EMP-FIRST-NAME.         
+            MOVE TRAN-LAST-NAME  TO EMP-LAST-NAME.           
+            MOVE TRAN-DEPT       TO EMP-DEPT.                
+            MOVE TRAN-BASIC      TO EMP-BASIC.               
+            MOVE TRAN-CCA        TO EMP-CCA.                 
+            WRITE EMP-IN-REC.                                
+            EVALUATE KSDS-STAT                               
+                WHEN '00'                                    
+                    CONTINUE                                 
+                WHEN '22'                                    
+                    DISPLAY '***DISCARDED EMPLOYEE EXITS***' 
+                WHEN OTHER                                   
+                    MOVE 2222 TO ABCODE                      
+                    PERFORM 9000-ABEND                       
+            END-EVALUATE.                                    
+       2200-CHANGE.                                          
+            MOVE TRAN-EMP-ID TO EMP-ID.                      
+            READ KSDS-MAST-FILE.                             
+            EVALUATE KSDS-STAT                        
+              WHEN '00'                               
+                PERFORM 2210-CHANGE-PROCESS           
+              WHEN '23'                               
+                DISPLAY 'DISCARDED-EMPLOYEE NOT FOUND'
+              WHEN OTHER                              
+                PERFORM 9000-ABEND                    
+            END-EVALUATE.                             
+       2210-CHANGE-PROCESS.                           
+            IF TRAN-FIRST-NAME NOT = SPACES           
+               MOVE TRAN-FIRST-NAME TO EMP-FIRST-NAME 
+            END-IF.                                   
+            IF TRAN-LAST-NAME NOT = SPACES            
+               MOVE TRAN-LAST-NAME TO EMP-LAST-NAME   
+            END-IF.                                   
+            IF TRAN-DEPT NOT = SPACES                 
+               MOVE TRAN-DEPT TO EMP-DEPT             
+            END-IF.                            
+            IF TRAN-BASIC NUMERIC              
+               MOVE TRAN-BASIC TO EMP-BASIC    
+            END-IF.                            
+            IF TRAN-CCA NUMERIC                
+               MOVE TRAN-CCA TO EMP-CCA        
+            END-IF.                            
+            REWRITE EMP-IN-REC.                
+            EVALUATE KSDS-STAT                 
+                 WHEN '00'                     
+                    CONTINUE                   
+                 WHEN OTHER                    
+                    MOVE 3233 TO ABCODE        
+                    PERFORM 9000-ABEND         
+            END-EVALUATE.                      
+       2300-DELETE.                            
+            MOVE TRAN-EMP-ID TO EMP-ID.        
+            DELETE KSDS-MAST-FILE RECORD.                
+            EVALUATE KSDS-STAT                           
+              WHEN '00'                                  
+                CONTINUE                                 
+              WHEN '23'                                  
+                DISPLAY 'DISCARDED-EMPLOYEE NOT FOUND'   
+              WHEN OTHER                                 
+                MOVE 2353 TO ABCODE                      
+                PERFORM 9000-ABEND                       
+            END-EVALUATE.                                
+       6000-EOJ.                                         
+            CLOSE KSDS-MAST-FILE                         
+                  EMP-TRAN-FILE.                         
+       6000-EXIT.                                        
+            EXIT.                                        
+       8000-READ-EMPTRAN.                                
+            READ EMP-TRAN-FILE.                          
+                DISPLAY 'DISCARDED-EMPLOYEE NOT FOUND'   
+              WHEN OTHER                                 
+                MOVE 2353 TO ABCODE                      
+                PERFORM 9000-ABEND                       
+            END-EVALUATE.                                
+       6000-EOJ.                                         
+            CLOSE KSDS-MAST-FILE                         
+                  EMP-TRAN-FILE.                         
+       6000-EXIT.                                        
+            EXIT.                                        
+       8000-READ-EMPTRAN.                                
+            READ EMP-TRAN-FILE.                          
+            EVALUATE TRAN-STAT                           
+                 WHEN '00'                               
+                   CONTINUE                              
+                 WHEN '10'                               
+                   MOVE 'Y' TO WS-EOF                    
+                  WHEN OTHER                        
+                    MOVE 1111 TO ABCODE             
+                    PERFORM 9000-ABEND              
+             END-EVALUATE.                          
+        8000-EXIT.                                  
+             EXIT.                                  
+        9000-ABEND.                                 
+             DISPLAY 'TRANSACTION ABENDED'.         
+             MOVE 0 TO CLEAN-UP.                    
+             CALL 'CEE3ABD' USING ABCODE, CLEAN-UP. 
