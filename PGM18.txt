@@ -1,0 +1,16 @@
+       IDENTIFICATION DIVISION.                  
+       PROGRAM-ID. PGM04.                        
+       ENVIRONMENT DIVISION.                     
+       DATA DIVISION.                            
+       WORKING-STORAGE SECTION.                  
+       77 ACT-FEILD1 PIC S9(06) VALUE 005667.    
+       77 MOD-FEILD1 PIC ZZZ,ZZZCR.              
+       77 ACT-FEILD2 PIC S9(06) VALUE -005667.   
+       77 MOD-FEILD2 PIC 999,999CR.              
+       PROCEDURE DIVISION.                       
+       0001-START.                               
+            MOVE ACT-FEILD1 TO MOD-FEILD1.       
+            MOVE ACT-FEILD2 TO MOD-FEILD2.       
+            DISPLAY ACT-FEILD1 " " ACT-FEILD2.   
+            DISPLAY MOD-FEILD1 " " MOD-FEILD2.   
+            GOBACK.                              

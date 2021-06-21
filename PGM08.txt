@@ -1,0 +1,16 @@
+       IDENTIFICATION DIVISION.             
+       PROGRAM-ID. PGM04.                   
+       ENVIRONMENT DIVISION.                
+       DATA DIVISION.                       
+       WORKING-STORAGE SECTION.             
+       77 A          PIC 9999  VALUE 1234.  
+       77 B          PIC 9999  VALUE 5285.  
+       PROCEDURE DIVISION.                  
+       0001-START.                          
+            DISPLAY "BEFORE".               
+            DISPLAY "A: " A.                
+            DISPLAY "B: " B.                
+            MOVE A TO B.                    
+            DISPLAY "A: " A.                
+            DISPLAY "B: " B.                
+            GOBACK.                         

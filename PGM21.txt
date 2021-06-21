@@ -1,0 +1,12 @@
+       IDENTIFICATION DIVISION.                                      
+       PROGRAM-ID. PGM24.                                            
+       ENVIRONMENT DIVISION.                                         
+       DATA DIVISION.                                                
+       WORKING-STORAGE SECTION.                                      
+       01 WS-S PIC 9(2) VALUE 4.                                     
+       PROCEDURE DIVISION.                                           
+       0001-START.                                                   
+            PERFORM STEP1 VARYING WS-S FROM 50 BY -1 UNTIL WS-S < 1. 
+            GOBACK.                                                  
+       STEP1.                                                        
+            DISPLAY 'LOOP' WS-S.                                     

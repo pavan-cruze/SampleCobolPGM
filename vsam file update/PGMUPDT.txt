@@ -1,0 +1,269 @@
+       IDENTIFICATION DIVISION.                               
+       PROGRAM-ID. PGMUPDT.                                   
+       ENVIRONMENT DIVISION.                                  
+       INPUT-OUTPUT SECTION.                                  
+       FILE-CONTROL.                                          
+                 SELECT OLD-MASTER-FILE ASSIGN TO OLDMAST     
+                                        STATUS OLD-STAT.      
+                 SELECT TRAN-FILE  ASSIGN TO TRANF            
+                                        STATUS TRANF-STAT.    
+                 SELECT NEW-MASTER-FILE ASSIGN TO NEWMAST     
+                                        STATUS NEW-STAT.      
+       DATA DIVISION.                                         
+       FILE SECTION.                                          
+       FD OLD-MASTER-FILE.                                    
+       01 OLD-MASTER-REC.                                     
+          05 OLD-EMP-ID             PIC X(05).                
+          05 OLD-EMP-FIRST-NAME     PIC X(25).  
+          05 OLD-EMP-LAST-NAME      PIC X(25).  
+          05 OLD-EMP-DEPT           PIC 9(04).  
+          05 OLD-EMP-BASIC          PIC 9(06).  
+          05 OLD-EMP-CCA            PIC 9(05).  
+       FD TRAN-FILE.                            
+       01 TRAN-REC.                             
+          05 TRAN-REC-TYPE          PIC X(02).  
+          05 TRAN-EMP-ID            PIC X(05).  
+          05 TRAN-TYPE              PIC X(01).  
+          05 TRAN-FIRST-NAME        PIC X(25).  
+          05 TRAN-LAST-NAME         PIC X(25).  
+          05 TRAN-DEPT              PIC 9(04).  
+          05 TRAN-BASIC            PIC 9(06).   
+          05 TRAN-CCA               PIC 9(05).  
+       FD NEW-MASTER-FILE.                      
+       01 NEW-MASTER-REC.                       
+          05 EMP-ID                 PIC X(05).      
+          05 EMP-FIRST-NAME         PIC X(25).      
+          05 EMP-LAST-NAME          PIC X(25).      
+          05 EMP-DEPT               PIC 9(04).      
+          05 EMP-BASIC              PIC 9(06).      
+          05 EMP-CCA                PIC 9(05).      
+       WORKING-STORAGE SECTION.                     
+       01 WORK-AREA-REC.                            
+          05 WORK-EMP-ID            PIC X(05).      
+          05 WORK-FIRST-NAME        PIC X(25).      
+          05 WORK-LAST-NAME         PIC X(25).      
+          05 WORK-DEPT              PIC 9(04).      
+          05 WORK-BASIC             PIC 9(06).      
+          05 WORK-CCA               PIC 9(05).      
+       77 CLEANUP                   PIC S9(9) COMP. 
+       77 ABCODE                    PIC S9(9) COMP. 
+       77 TRANF-STAT                PIC X(02).      
+       77 OLD-STAT                  PIC X(02).          
+       77 NEW-STAT                  PIC X(02).          
+       PROCEDURE DIVISION.                              
+       0001-START.                                      
+            PERFORM 1000-INIT THRU 1000-EXIT.           
+            PERFORM 2000-COMP-PROCESS THRU 2000-EXIT    
+                    UNTIL OLD-EMP-ID = HIGH-VALUES AND  
+                          TRAN-EMP-ID = HIGH-VALUES.    
+            IF WORK-AREA-REC NOT = LOW-VALUES           
+               MOVE WORK-AREA-REC TO NEW-MASTER-REC     
+               WRITE NEW-MASTER-REC                     
+            END-IF.                                     
+            PERFORM 8000-EOJ THRU 8000-EXIT.            
+            GOBACK.                                     
+       1000-INIT.                                       
+            OPEN INPUT OLD-MASTER-FILE TRAN-FILE.       
+            OPEN OUTPUT NEW-MASTER-FILE.                
+            MOVE LOW-VALUES TO WORK-AREA-REC.            
+            PERFORM 8100-READ-OLD-MASTER THRU 8100-EXIT. 
+            PERFORM 8200-READ-TRAN THRU 8200-EXIT.       
+       1000-EXIT.                                        
+            EXIT.                                        
+       2000-COMP-PROCESS.                                
+            EVALUATE TRUE                                
+               WHEN OLD-EMP-ID > TRAN-EMP-ID             
+                    PERFORM 2100-MASTER-HIGH             
+               WHEN OLD-EMP-ID < TRAN-EMP-ID             
+                    PERFORM 2200-MASTER-LOW              
+               WHEN OLD-EMP-ID = TRAN-EMP-ID             
+                    PERFORM 2300-MASTER-EQUAL            
+            END-EVALUATE.                                
+       2000-EXIT.                                        
+            EXIT.                                        
+       2100-MASTER-HIGH.                                 
+            DISPLAY WORK-AREA-REC '****'.               
+            DISPLAY TRAN-REC '****'.                    
+            EVALUATE TRAN-TYPE                          
+               WHEN '1'                                 
+                 PERFORM 2110-ADD THRU 2110-EXIT        
+               WHEN '2'                                 
+                 PERFORM 2120-CHANGE THRU 2120-EXIT     
+               WHEN '3'                                 
+                 PERFORM 2130-DELETE THRU 2130-EXIT     
+               WHEN OTHER                               
+                 PERFORM 8200-READ-TRAN THRU 8200-EXIT  
+            END-EVALUATE.                               
+       2110-ADD.                                        
+           IF WORK-AREA-REC NOT = LOW-VALUES            
+              IF WORK-EMP-ID = TRAN-EMP-ID              
+                  DISPLAY TRAN-REC                      
+                  DISPLAY '****DISCARDED****'           
+                  DISPLAY '------------------------------------'
+                  PERFORM 8200-READ-TRAN THRU 8200-EXIT         
+              ELSE                                              
+                  WRITE NEW-MASTER-REC FROM WORK-AREA-REC       
+                  MOVE LOW-VALUES TO WORK-AREA-REC              
+                  PERFORM 2111-MOVE-TRAN-TO-WORK                
+                  PERFORM 8200-READ-TRAN THRU 8200-EXIT         
+              END-IF                                            
+           ELSE                                                 
+               PERFORM 2111-MOVE-TRAN-TO-WORK                   
+               PERFORM 8200-READ-TRAN THRU 8200-EXIT            
+           END-IF.                                              
+       2110-EXIT.                                               
+            EXIT.                                               
+       2111-MOVE-TRAN-TO-WORK.                                  
+              MOVE TRAN-EMP-ID TO WORK-EMP-ID.                  
+              MOVE TRAN-FIRST-NAME TO WORK-FIRST-NAME.          
+              MOVE TRAN-LAST-NAME TO WORK-LAST-NAME.                 
+              MOVE TRAN-DEPT TO WORK-DEPT.                           
+              MOVE TRAN-BASIC TO WORK-BASIC.                         
+              MOVE TRAN-CCA TO WORK-CCA.                             
+       2120-CHANGE.                                                  
+                  IF WORK-AREA-REC NOT = LOW-VALUES                  
+                     IF WORK-EMP-ID = TRAN-EMP-ID                    
+                        PERFORM 2121-APPLY-CHANGES-TO-WORK           
+                        PERFORM 8200-READ-TRAN THRU 8200-EXIT        
+                     ELSE                                            
+                        WRITE NEW-MASTER-REC FROM WORK-AREA-REC      
+                        MOVE LOW-VALUES TO WORK-AREA-REC             
+                        DISPLAY TRAN-REC                             
+                        DISPLAY '****DISCARDED****'                  
+                        DISPLAY '------------------------------------'
+                        PERFORM 8200-READ-TRAN THRU 8200-EXIT        
+                     END-IF                       
+                  ELSE                                            
+                     DISPLAY TRAN-REC                             
+                     DISPLAY '****DISCARDED****'                  
+                     DISPLAY '---------------------------------'  
+                     PERFORM 8200-READ-TRAN THRU 8200-EXIT        
+                  END-IF.                                         
+       2120-EXIT.                                                 
+            EXIT.                                                 
+       2121-APPLY-CHANGES-TO-WORK.                                
+             IF TRAN-FIRST-NAME NOT = SPACES                      
+                  MOVE TRAN-FIRST-NAME TO WORK-FIRST-NAME         
+             END-IF.                                              
+             IF TRAN-LAST-NAME NOT = SPACES                       
+                  MOVE TRAN-LAST-NAME TO WORK-LAST-NAME           
+             END-IF.                                              
+             IF TRAN-DEPT NUMERIC                                 
+                  MOVE TRAN-DEPT TO WORK-DEPT                     
+             END-IF.                                        
+             IF TRAN-BASIC NUMERIC                          
+                  MOVE TRAN-BASIC TO WORK-BASIC             
+             END-IF.                                        
+             IF TRAN-CCA NUMERIC                            
+                  MOVE TRAN-CCA TO WORK-CCA                 
+             END-IF.                                        
+       2130-DELETE.                                         
+             DISPLAY WORK-AREA-REC.                         
+             DISPLAY TRAN-REC.                              
+             IF WORK-AREA-REC NOT = LOW-VALUES              
+                IF WORK-EMP-ID = TRAN-EMP-ID                
+                   MOVE LOW-VALUES TO WORK-AREA-REC         
+                   PERFORM 8200-READ-TRAN THRU 8200-EXIT    
+                ELSE                                        
+                   WRITE NEW-MASTER-REC FROM WORK-AREA-REC  
+                   MOVE LOW-VALUES TO WORK-AREA-REC         
+                   DISPLAY TRAN-REC                                
+                   DISPLAY '****DISCARDED****'                     
+                   DISPLAY '------------------------------------'  
+                   PERFORM 8200-READ-TRAN THRU 8200-EXIT           
+                END-IF                                             
+             ELSE                                                  
+                   DISPLAY '****' TRAN-REC                         
+                   DISPLAY '****DISCARDED****'                     
+                   DISPLAY '------------------------------------'  
+                   PERFORM 8200-READ-TRAN THRU 8200-EXIT           
+             END-IF.                                               
+       2130-EXIT.                                                  
+            EXIT.                                                  
+      ******************************************************       
+       2200-MASTER-LOW.                                            
+             IF WORK-AREA-REC NOT = LOW-VALUES                     
+                 WRITE NEW-MASTER-REC FROM WORK-AREA-REC           
+                  MOVE LOW-VALUES TO WORK-AREA-REC                  
+             END-IF.                                                
+             WRITE NEW-MASTER-REC FROM OLD-MASTER-REC               
+             PERFORM 8100-READ-OLD-MASTER THRU 8100-EXIT.           
+      ************************************************************  
+       2210-APPLY-CHANGES-TO-OLD.                                   
+             IF TRAN-FIRST-NAME NOT = SPACES                        
+                  MOVE TRAN-FIRST-NAME TO OLD-EMP-FIRST-NAME        
+             END-IF.                                                
+             IF TRAN-LAST-NAME NOT = SPACES                         
+                  MOVE TRAN-LAST-NAME TO OLD-EMP-LAST-NAME          
+             END-IF.                                                
+             IF TRAN-DEPT NUMERIC                                   
+                  MOVE TRAN-DEPT TO OLD-EMP-DEPT                    
+             END-IF.                                                
+             IF TRAN-BASIC NUMERIC                                  
+                  MOVE TRAN-BASIC TO OLD-EMP-BASIC                  
+
+             END-IF.                                               
+             IF TRAN-CCA NUMERIC                                   
+                  MOVE TRAN-CCA TO OLD-EMP-CCA                     
+             END-IF.                                               
+       2210-EXIT.                                                  
+             EXIT.                                                 
+       2300-MASTER-EQUAL.                                          
+      *     IF WORK-AREA-REC NOT = LOW-VALUES                      
+      *           WRITE NEW-MASTER-REC FROM WORK-AREA-REC          
+      *           MOVE LOW-VALUES TO WORK-AREA-REC                 
+      *     END-IF.                                                
+      *     DISPLAY OLD-EMP-ID '====' TRAN-EMP-ID.                 
+            EVALUATE TRAN-TYPE                                     
+                WHEN '1'                                           
+                   DISPLAY TRAN-REC                                
+                   DISPLAY '****DISCARDED****'                     
+                   DISPLAY '-----------------------------------'   
+                   PERFORM 8200-READ-TRAN THRU 8200-EXIT             
+                WHEN '2'                                             
+                    PERFORM 2210-APPLY-CHANGES-TO-OLD THRU 2210-EXIT 
+                    PERFORM 8200-READ-TRAN THRU 8200-EXIT            
+                WHEN '3'                                             
+                   IF WORK-AREA-REC NOT = LOW-VALUES                 
+                        WRITE NEW-MASTER-REC FROM WORK-AREA-REC      
+                        MOVE LOW-VALUES TO WORK-AREA-REC             
+                   END-IF                                            
+                   PERFORM 8100-READ-OLD-MASTER THRU 8100-EXIT       
+                   PERFORM 8200-READ-TRAN THRU 8200-EXIT             
+             END-EVALUATE.                                           
+       8000-EOJ.                                                     
+            CLOSE OLD-MASTER-FILE                                    
+                  TRAN-FILE                                          
+                  NEW-MASTER-FILE.                                   
+       8000-EXIT.                                                    
+            EXIT.                                       
+       8100-READ-OLD-MASTER.                            
+            READ OLD-MASTER-FILE.                       
+            EVALUATE OLD-STAT                           
+                 WHEN '00'                              
+                   DISPLAY OLD-EMP-ID '----'            
+                 WHEN '10'                              
+                   MOVE HIGH-VALUES TO OLD-EMP-ID       
+                 WHEN OTHER                             
+                   MOVE 1111 TO ABCODE                  
+                   PERFORM 9000-ABEND                   
+            END-EVALUATE.                               
+       8100-EXIT.                                       
+            EXIT.                                       
+                                                        
+       8200-READ-TRAN.                                  
+            READ TRAN-FILE.                             
+            EVALUATE TRANF-STAT                     
+                 WHEN '00'                          
+                   DISPLAY TRAN-EMP-ID '-----'      
+                 WHEN '10'                          
+                   MOVE HIGH-VALUES TO TRAN-EMP-ID  
+                 WHEN OTHER                         
+                   MOVE 2222 TO ABCODE              
+                   PERFORM 9000-ABEND               
+            END-EVALUATE.                           
+       8200-EXIT.                                   
+            EXIT.                                   
+       9000-ABEND.                                  
+            MOVE 0 TO CLEANUP.                      
+            CALL 'CEE3ABD' USING ABCODE CLEANUP.                       

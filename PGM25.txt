@@ -1,0 +1,27 @@
+       IDENTIFICATION DIVISION.                     
+       PROGRAM-ID. PGM40.                           
+       ENVIRONMENT DIVISION.                        
+       DATA DIVISION.                               
+       WORKING-STORAGE SECTION.                     
+       01 DAY-VALUES.                               
+          05 FILLER PIC X(10) VALUE 'MONDAY'.       
+          05 FILLER PIC X(10) VALUE 'TUESDAY'.      
+          05 FILLER PIC X(10) VALUE 'WEDNESDAY'.    
+          05 FILLER PIC X(10) VALUE 'THURSDAY'.     
+          05 FILLER PIC X(10) VALUE 'FRIDAY'.       
+          05 FILLER PIC X(10) VALUE 'SATURDAY'.     
+          05 FILLER PIC X(10) VALUE 'SUNDAY'.       
+       01 DAY-TABLE REDEFINES DAY-VALUES.           
+          05 DAY-TEXT PIC X(10) OCCURS 7 TIMES.     
+       LINKAGE SECTION.                             
+       01 DAY-N PIC 9.                              
+       01 DAY-NAME PIC X(10).                       
+       PROCEDURE DIVISION USING DAY-N DAY-NAME.     
+       0001-START.                                  
+            EVALUATE DAY-N                          
+                WHEN 1 THRU 7                       
+                   MOVE DAY-TEXT(DAY-N) TO DAY-NAME 
+                WHEN OTHER                          
+                   MOVE '***ERROR**' TO DAY-NAME    
+            END-EVALUATE.                           
+            GOBACK.                                 

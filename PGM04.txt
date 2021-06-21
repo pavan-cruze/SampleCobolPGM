@@ -1,0 +1,11 @@
+       IDENTIFICATION DIVISION.                
+       PROGRAM-ID. PGM04.                      
+       ENVIRONMENT DIVISION.                   
+       DATA DIVISION.                          
+       WORKING-STORAGE SECTION.                
+       77 CUR-TIME PIC 9(08).                  
+       PROCEDURE DIVISION.                     
+       0001-START.                             
+            ACCEPT CUR-TIME FROM TIME.         
+            DISPLAY "CURRENT TIME" CUR-TIME.   
+            GOBACK.                            

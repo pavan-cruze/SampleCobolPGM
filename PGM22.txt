@@ -1,0 +1,62 @@
+       IDENTIFICATION DIVISION.              
+       PROGRAM-ID. PGM25.                    
+       ENVIRONMENT DIVISION.                 
+       INPUT-OUTPUT SECTION.                 
+       FILE-CONTROL.                         
+            SELECT EMPFILE ASSIGN TO INFILE  
+                           STATUS EMP-STAT.  
+       DATA DIVISION.                        
+       FILE SECTION.                         
+       FD EMPFILE.                           
+          01 EMP-REC.                        
+             05 EMP-ID PIC X(5).             
+             05 EMP-FIRST PIC X(25).         
+             05 EMP-LAST PIC X(25).          
+             05 EMP-DEPT PIC X(4).           
+             05 EMP-BASIC PIC X(6).          
+             05 EMP-CCA PIC X(5).                        
+       WORKING-STORAGE SECTION.                          
+       77 EMP-STAT PIC XX.                               
+       77 CLEANUP PIC S9(9) COMP.                        
+       77 ABCODE PIC S9(9) COMP.                         
+       77 EOF-INPUT PIC X VALUE 'N'.                     
+       PROCEDURE DIVISION.                               
+       0001-START.                                       
+            PERFORM 1000-INIT THRU 1000-EXIT.            
+            PERFORM 2000-COPY-REC THRU 2000-EXIT         
+                    UNTIL EOF-INPUT = 'Y'.               
+            PERFORM 6000-EOJ THRU 6000-EXIT.             
+            GOBACK.                                      
+       1000-INIT.                                        
+            OPEN INPUT EMPFILE.                          
+            IF EMP-STAT NOT = '00'                       
+                  DISPLAY 'ERROR WHILE OPENING YOUR FILE'
+                  EMP-STAT                            
+                  MOVE 1111 TO ABCODE                 
+                  PERFORM 9000-ABEND                  
+            END-IF.                                   
+       1000-EXIT.                                     
+            EXIT.                                     
+       2000-COPY-REC.                                 
+             PERFORM 3000-READ-INPUT THRU 3000-EXIT.  
+             IF EOF-INPUT = 'N'                       
+                  PERFORM 4000-PROCESS-OUTPUT THRU    
+                          4000-EXIT                   
+             END-IF.                                  
+       2000-EXIT.                                     
+             EXIT.                                    
+       3000-READ-INPUT.                               
+           READ EMPFILE AT END MOVE 'Y' TO EOF-INPUT. 
+       3000-EXIT.                                     
+            EXIT.                                
+       4000-PROCESS-OUTPUT.                      
+           DISPLAY EMP-REC.                      
+       4000-EXIT.                                
+           EXIT.                                 
+       6000-EOJ.                                 
+            CLOSE EMPFILE.                       
+       6000-EXIT.                                
+            EXIT.                                
+       9000-ABEND.                               
+           MOVE 0 TO CLEANUP.                    
+           CALL 'CEE3ABD' USING ABCODE CLEANUP.  

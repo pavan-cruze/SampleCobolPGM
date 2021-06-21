@@ -1,0 +1,11 @@
+       IDENTIFICATION DIVISION.                     
+       PROGRAM-ID. PGM03.                           
+       ENVIRONMENT DIVISION.                        
+       DATA DIVISION.                               
+       WORKING-STORAGE SECTION.                     
+       77 CUR-DAY-OF-WEEK PIC 9(01).                
+       PROCEDURE DIVISION.                          
+       0001-START.                                  
+            ACCEPT CUR-DAY-OF-WEEK FROM DAY-OF-WEEK.
+            DISPLAY "CURRENT DAY:" CUR-DAY-OF-WEEK. 
+            GOBACK.                                 

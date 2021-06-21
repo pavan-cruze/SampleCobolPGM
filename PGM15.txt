@@ -1,0 +1,14 @@
+       IDENTIFICATION DIVISION.                  
+       PROGRAM-ID. PGM16                         
+       ENVIRONMENT DIVISION.                     
+       DATA DIVISION.                            
+       WORKING-STORAGE SECTION.                  
+       77 WS-NUM PIC S9(04) COMP-3 VALUE +568.   
+       77 WS-NUMX REDEFINES WS-NUM PIC X(03).    
+       77 WS-NUM2 PIC S9(04) COMP-3 VALUE -568.  
+       77 WS-NUM2X REDEFINES WS-NUM2 PIC X(03).  
+       PROCEDURE DIVISION.                       
+       0001-START.                               
+            DISPLAY "POSITIVE VALUE:" WS-NUMX.   
+            DISPLAY "NEGETIVE DAY:" WS-NUM2X.    
+            GOBACK.                              

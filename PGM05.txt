@@ -1,0 +1,15 @@
+       IDENTIFICATION DIVISION.            
+       PROGRAM-ID. PGM05.                  
+       ENVIRONMENT DIVISION.               
+       DATA DIVISION.                      
+       WORKING-STORAGE SECTION.            
+       77 WS-ALPHA    PIC A(5).            
+       77 WS-NUM      PIC 9(5).            
+       77 WS-ALNUM    PIC X(4).            
+       77 WS-NUMBER   PIC 99V99.           
+       PROCEDURE DIVISION.                 
+       0001-START.                         
+            MOVE WS-ALPHA TO WS-NUM.       
+            MOVE SPACES TO WS-NUM.         
+            MOVE WS-NUMBER TO WS-ALNUM.    
+            GOBACK.                        

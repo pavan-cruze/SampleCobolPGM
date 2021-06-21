@@ -1,0 +1,17 @@
+       IDENTIFICATION DIVISION.                        
+       PROGRAM-ID. PGM41.                              
+       ENVIRONMENT DIVISION.                           
+       DATA DIVISION.                                  
+       WORKING-STORAGE SECTION.                        
+       77 WS-NUM PIC 9.                                
+       77 WS-DAY-NAME PIC X(10).                       
+       PROCEDURE DIVISION.                             
+      *LINKAGE FOR SUB PROGRAM ON PGM25.               
+       0001-START.                                     
+            MOVE 1 TO WS-NUM.                          
+            CALL 'PGM25' USING WS-NUM WS-DAY-NAME.     
+            DISPLAY WS-DAY-NAME ' ' WS-NUM.            
+            MOVE 9 TO  WS-NUM.                         
+            CALL 'PGM40' USING WS-NUM WS-DAY-NAME.     
+            DISPLAY WS-DAY-NAME ' ' WS-NUM.            
+            GOBACK.            

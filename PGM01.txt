@@ -1,0 +1,11 @@
+       IDENTIFICATION DIVISION.                       
+       PROGRAM-ID. PGM01.                             
+       ENVIRONMENT DIVISION.                          
+       DATA DIVISION.                                 
+       WORKING-STORAGE SECTION.                       
+       77 CUR-DATE PIC 9(08).                         
+       PROCEDURE DIVISION.                            
+       0001-START.                                    
+            ACCEPT CUR-DATE FROM DATE YYYYMMDD.       
+            DISPLAY "CURRENT DAY:" CUR-DATE.          
+            GOBACK.                                   

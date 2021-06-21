@@ -1,0 +1,13 @@
+       IDENTIFICATION DIVISION.                                    
+       PROGRAM-ID. PGM07.                                          
+       ENVIRONMENT DIVISION.                                       
+       DATA DIVISION.                                              
+       WORKING-STORAGE SECTION.                                    
+       77 WHOLE-NAME PIC X(25) VALUE 'PAVAN SAI KUMAR MANNEPURI'.  
+       77 FIRST-NAME PIC X(10) VALUE 'PAVAN SAI'.                  
+       PROCEDURE DIVISION.                                         
+       0001-START.                                                 
+            MOVE WHOLE-NAME(11:) TO FIRST-NAME.                    
+            DISPLAY "FULL NAME: " WHOLE-NAME '*'.                  
+            DISPLAY "FIRST NAME: " FIRST-NAME.                     
+            GOBACK.                                                

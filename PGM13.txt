@@ -1,0 +1,20 @@
+       IDENTIFICATION DIVISION.                      
+       PROGRAM-ID. PGM04.                            
+       ENVIRONMENT DIVISION.                         
+       DATA DIVISION.                                
+       WORKING-STORAGE SECTION.                      
+       77 WS-NUM  PIC 99 VALUE 1.                    
+       77 WS-NUM6 PIC 9 VALUE 5.                     
+       77 WS-NUM7 PIC 99 VALUE 15.                   
+       PROCEDURE DIVISION.                           
+       0001-START.                                   
+             DISPLAY "BEFORE ADDITION".              
+             DISPLAY "WS-NUM: " WS-NUM.              
+             DISPLAY "WS-NUM6: " WS-NUM6.            
+             DISPLAY "WS-NUM7: " WS-NUM7.            
+      ***   *DIVIDE WS-NUM6 INTO WS-NUM7.            
+             DIVIDE WS-NUM7 BY WS-NUM6 GIVING WS-NUM.
+             DISPLAY "WS-NUM6: " WS-NUM6.  
+             DISPLAY "WS-NUM7: " WS-NUM7.  
+             DISPLAY "WS-NUM:  " WS-NUM.   
+             GOBACK.                       

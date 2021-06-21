@@ -1,0 +1,15 @@
+       IDENTIFICATION DIVISION.                         
+       PROGRAM-ID. PGM04.                               
+       ENVIRONMENT DIVISION.                            
+       DATA DIVISION.                                   
+       WORKING-STORAGE SECTION.                         
+       77 ACTUAL  PIC 9(10) VALUE 12345678.             
+       77 SEP  PIC 999B999B999B9.                       
+       77 MULTI PIC X(10) VALUE 12345678.               
+       77 MOD PIC $XXXBXXXBXXXBX.                       
+       PROCEDURE DIVISION.                              
+       0001-START.                                      
+            MOVE ACTUAL TO SEP.                         
+            MOVE MULTI  TO MOD.                         
+            DISPLAY ACTUAL " " SEP " " MULTI " " MOD.   
+            GOBACK.                                     

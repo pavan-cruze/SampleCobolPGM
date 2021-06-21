@@ -1,0 +1,16 @@
+       IDENTIFICATION DIVISION.                           
+       PROGRAM-ID. PGM03.                                 
+       ENVIRONMENT DIVISION.                              
+       DATA DIVISION.                                     
+       WORKING-STORAGE SECTION.                           
+       77 NUM1 PIC 9(02)V99 VALUE 55.66.                  
+       77 NUM2 PIC 9(02)V99 VALUE 10.33.                  
+       77 NUM3 PIC 9(05) VALUE 0.                         
+       PROCEDURE DIVISION.                                
+       0001-START.                                        
+            DISPLAY NUM1 ' ' NUM2 ' ' NUM3.               
+      *     MULTIPLY NUM1 BY NUM2 GIVING NUM3 ROUNDED     
+      *     ON SIZE ERROR DISPLAY "SIZE ERROR FOUND".     
+            ADD NUM1 NUM2 GIVING NUM3 ROUNDED.            
+            DISPLAY NUM1 ' ' NUM2 ' ' NUM3.               
+            GOBACK.                                       

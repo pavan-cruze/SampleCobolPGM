@@ -1,0 +1,13 @@
+       IDENTIFICATION DIVISION.                  
+       PROGRAM-ID. PGM04.                        
+       ENVIRONMENT DIVISION.                     
+       DATA DIVISION.                            
+       WORKING-STORAGE SECTION.                  
+       77 WHOLE-NAME PIC X(25) VALUE 'PAVAN'.    
+       77 FIRST-NAME PIC X(10).                  
+       PROCEDURE DIVISION.                       
+       0001-START.                               
+            MOVE WHOLE-NAME(1:10) TO FIRST-NAME. 
+            DISPLAY "FULL NAME: " WHOLE-NAME '*'.
+            DISPLAY "FIRST NAME: " FIRST-NAME.   
+            GOBACK.                              

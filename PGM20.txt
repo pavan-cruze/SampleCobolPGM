@@ -1,0 +1,31 @@
+       IDENTIFICATION DIVISION.               
+       PROGRAM-ID. PGM22.                     
+       ENVIRONMENT DIVISION.                  
+       DATA DIVISION.                         
+       WORKING-STORAGE SECTION.               
+       01 CHECK-AGE-GRP.                      
+          05 AGE PIC 9(2).                    
+             88 INFANT VALUE 1 THRU 2.        
+             88 BABY   VALUE 3 THRU 6.        
+             88 CHILD  VALUE 7 THRU 12.       
+             88 TEEN VALUE 13 THRU 19.        
+             88 ADULT VALUE 20 THRU 99.       
+       PROCEDURE DIVISION.                    
+       0001-START.                            
+            PERFORM 0010-AGE-VALIDATE 3 TIMES.
+            GOBACK.                           
+     ****************************************
+       0010-AGE-VALIDATE.                    
+            ACCEPT AGE FROM SYSIN.           
+            EVALUATE TRUE                    
+              WHEN INFANT                    
+                   DISPLAY "INFANT AGE"      
+              WHEN BABY                      
+                   DISPLAY "BABY AGE"        
+              WHEN CHILD                     
+                   DISPLAY "CHILD AGE"       
+              WHEN TEEN                      
+                   DISPLAY "TEEN-AGE"        
+              WHEN ADULT                     
+                   DISPLAY "ADULT"           
+            END-EVALUATE.                    
