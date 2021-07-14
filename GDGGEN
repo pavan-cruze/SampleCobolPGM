@@ -1,0 +1,10 @@
+//DSRC027A JOB NOTIFY=&SYSUID,CLASS=A     
+//GDGSTEP EXEC PGM=IDCAMS                 
+//SYSPRINT DD SYSOUT=*                    
+//SYSIN    DD *                           
+  DEFINE GDG(NAME(DSRC027.IMS.LOG)-       
+           LIMIT(3) -                     
+           NOEMPTY -                      
+        SCRATCH)                          
+/*                                        
+//                                        
